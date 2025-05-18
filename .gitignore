@@ -128,7 +128,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+backend/.env
 .venv
 env/
 venv/
@@ -176,3 +176,6 @@ cython_debug/
 
 /backend/vectorstore
 /backend/uploaded_pdfs
+/backend/vector_store_path
+/backend/nda_store
+/backend/nda_store_new
