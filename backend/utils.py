@@ -2,10 +2,8 @@ import os
 import fitz
 from dotenv import load_dotenv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
-from langchain.schema import SystemMessage, HumanMessage
-from langchain.chat_models import ChatOpenAI
 
 load_dotenv()
 
