@@ -2,10 +2,9 @@ import os
 import fitz
 from dotenv import load_dotenv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
-from langchain.schema import SystemMessage, HumanMessage
-from langchain.chat_models import ChatOpenAI
+from langsmith import traceable
 
 load_dotenv()
 
@@ -20,6 +19,7 @@ def read_pdf(file_path):
     pdf_document.close()
     return text
 
+@traceable
 def chunk_text(text):
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=500,
@@ -37,5 +37,6 @@ def load_vector_store(store_path):
     embeddings = OpenAIEmbeddings()
     return FAISS.load_local(store_path, embeddings, allow_dangerous_deserialization=True)
 
+@traceable
 def get_top_chunks(prompt, vectordb, k=4):
     return vectordb.similarity_search(prompt, k=k)

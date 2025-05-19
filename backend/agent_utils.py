@@ -1,6 +1,8 @@
 from utils import read_pdf
 from agent_executor import agent_executor
+from langsmith import traceable
 
+@traceable
 def process_pdf_and_respond_with_agent(pdf_path):
     text = read_pdf(pdf_path)
     hardcoded_question = "Summarize the content of this document."

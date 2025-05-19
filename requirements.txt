@@ -19,3 +19,5 @@ langchain-openai
 streamlit
 fastapi
 openai
+langsmith
+langchain-openai
