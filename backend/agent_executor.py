@@ -1,7 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 from langgraph_supervisor import create_supervisor
-from agents import chunk_pdf_text, embed_and_store_single_input, qa_from_store
+from agent_tools import chunk_pdf_text, embed_and_store_single_input, qa_from_store
 
 llm_model = "gpt-4o-mini"
 
