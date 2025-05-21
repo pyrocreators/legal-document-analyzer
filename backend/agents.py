@@ -1,5 +1,6 @@
 from langchain.tools import tool
 from utils import chunk_text, get_vector_store, load_vector_store, get_top_chunks
+HARDCODED_STORE_PATH = "vectorstore/default_store"
 
 @tool
 def chunk_pdf_text(text: str) -> str:
@@ -7,29 +8,26 @@ def chunk_pdf_text(text: str) -> str:
     chunks = chunk_text(text)
     return "\n---\n".join(chunks[:5])  # Return a sample of chunks for brevity
 
+
 @tool
-def embed_and_store_single_input(input: str) -> str:
+def embed_and_store_single_input(text: str) -> str:
     """
-    Embeds text and stores it in the vector store.
-    Input format: <text>::<store_path>
-    """
+       Embeds text and stores it in the vector store.
+       """
     try:
-        text, store_path = input.split("::")
         chunks = chunk_text(text)
-        get_vector_store(chunks, store_path)
-        return f"Successfully embedded and stored vectors at {store_path}."
+        get_vector_store(chunks, HARDCODED_STORE_PATH)
+        return f"Successfully embedded and stored vectors at {HARDCODED_STORE_PATH}."
     except Exception as e:
         return f"Error: {e}"
 
 @tool
-def qa_from_store(input: str) -> str:
+def qa_from_store(question: str) -> str:
     """
-    Retrieves chunks relevant to a question from a stored vector database and returns them.
-    Input format: <question>::<store_path>
-    """
+       Retrieves chunks relevant to a question from a stored vector database and returns them.
+       """
     try:
-        question, store_path = input.split("::")
-        vectordb = load_vector_store(store_path)
+        vectordb = load_vector_store(HARDCODED_STORE_PATH)
         results = get_top_chunks(question, vectordb)
         return "\n".join([doc.page_content for doc in results])
     except Exception as e:

@@ -25,11 +25,7 @@ async def upload_pdf(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, f)
 
     response_text = process_pdf_and_with_summary(file_location)
-    return JSONResponse(content={
-        "filename": file.filename,
-        "message": "PDF uploaded and processed successfully.",
-        "response": response_text
-    })
+    return response_text
 
 @app.post("/key-points/")
 async def upload_pdf(file: UploadFile = File(...)):
