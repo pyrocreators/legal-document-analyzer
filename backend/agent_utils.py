@@ -9,26 +9,27 @@ from agent_executor import supervisor
 def process_pdf_and_with_summary(pdf_path):
     text = read_pdf(pdf_path)
 
-    hardcoded_question = (
-        "Analyze the document and provide a brief summary that includes only:\n"
-        "1. The type of document (e.g., NDA, employment contract, service agreement).\n"
-        "2. The expiration date, if mentioned.\n"
-        "Respond in the same language as the document."
-    )
-
     plan_prompt = f"""
-You are a legal document analyzer agent. Please:
-1. chunk pdf document using chunk_agent
-2. Embed and store this text in a vector store.
-3. querying the stored vector database.
-4. Then, answer the question based on the stored data.
+    You are a legal document analyzer agent. Your task is to process and summarize the legal document provided below. Follow these steps carefully:
 
+    1. Split the document into semantically meaningful chunks using the `chunk_agent`.
+    2. Embed the chunks and store them in a vector database.
+    3. Query the vector database using the question below.
+    4. Provide a precise, information-rich response based strictly on the document's content.
 
-Question: {hardcoded_question}
+    ### Question:
+    Analyze the document and answer the following:
+    - What type of legal document is this (e.g., NDA, employment contract, service agreement)?
+    - Is there an expiration date mentioned? If yes, what is it?
 
-Here is the document content:
-{text[:4000]}  # truncated for token limit
-"""
+    ### Constraints:
+    - Do **not** start your response with generic phrases like "This is the summarized document."
+    - Respond in the **same language** as the document.
+    - Your response should be **brief**, **factual**, and **clearly formatted** using bullet points if helpful.
+
+    ### Document (first 4000 characters):
+    {text[:4000]}
+    """
 
     last_response = None
     for chunk in supervisor.stream(
