@@ -1,8 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
 import os
 import shutil
-
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from agent_utils import process_pdf_and_with_summary, process_pdf_and_with_key_points
 
@@ -10,6 +9,15 @@ from agent_utils import process_pdf_and_with_summary, process_pdf_and_with_key_p
 load_dotenv()
 
 app = FastAPI()
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 UPLOAD_DIR = "uploaded_pdfs"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
