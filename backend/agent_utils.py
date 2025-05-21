@@ -1,5 +1,5 @@
 from starlette.responses import JSONResponse
-
+from langchain_core.messages import convert_to_messages
 from utils import read_pdf
 from langsmith import traceable
 from agent_executor import supervisor
@@ -23,7 +23,6 @@ You are a legal document analyzer agent. Please:
 3. querying the stored vector database.
 4. Then, answer the question based on the stored data.
 
-Use this format for both steps: <text or question>::<store_path>.
 
 Question: {hardcoded_question}
 
@@ -43,7 +42,6 @@ Here is the document content:
             }
     ):
         last_response = pretty_print_messages(chunk, last_message=True)
-    print(last_response, 'last response print')
     return JSONResponse(content={"summary": last_response.content})
 
 
@@ -52,28 +50,47 @@ def process_pdf_and_with_key_points(pdf_path):
     text = read_pdf(pdf_path)
 
     hardcoded_question = (
-        "Summarize the key points from this document. "
-        "If this is a legal document, especially an NDA, highlight the restrictions using the format: "
-        "'Key Point Name - Description'. "
-        "Respond in the same language as the document."
+            "You are analyzing a legal document. Summarize the key points using the following format:\n"
+            "- [Key Point Title]: [Short Description]\n\n"
+            "If the document is an NDA or similar, be sure to include:\n"
+            "- Confidentiality Obligations\n"
+            "- Term and Termination\n"
+            "- Permitted Disclosures\n"
+            "- Restrictions on Use\n"
+            "- Consequences of Breach\n\n"
+            "Respond in the same language as the document. Avoid generic statements like 'The task has been completed.'"
     )
 
     plan_prompt = f"""
-You are a legal document analyzer agent. Please:
-1. Embed and store this text in a vector store.
-2. Then, answer the question based on the stored data.
+    You are a legal document analyzer agent. Your task is to:
 
-Use this format for both steps: <text or question>::<store_path>.
+    1. Use chunk_agent to split the document.
+    2. Store the chunks in a vector store.
+    3. Query the vector store to answer the user's question.
+    4. Respond in a structured bullet-point format based only on the document content.
 
-Question: {hardcoded_question}
+    Document (truncated to fit context limits):
+    {text[:4000]}
 
-Here is the document content:
-{text[:4000]}  # truncated for token limit
-"""
-    return "agent_executor.run(plan_prompt)"
+    Question:
+    {hardcoded_question}
+    """
+
+    last_response = None
+    for chunk in supervisor.stream(
+            {
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": plan_prompt
+                    }
+                ]
+            }
+    ):
+        last_response = pretty_print_messages(chunk, last_message=True)
+    return JSONResponse(content={"summary": last_response.content})
 
 
-from langchain_core.messages import convert_to_messages
 
 
 def pretty_print_message(message, indent=False):
