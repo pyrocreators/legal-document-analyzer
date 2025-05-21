@@ -65,10 +65,10 @@ def process_pdf_and_with_key_points(pdf_path):
     plan_prompt = f"""
     You are a legal document analyzer agent. Your task is to:
 
-    1. Use chunk_agent to split the document.
-    2. Store the chunks in a vector store.
-    3. Query the vector store to answer the user's question.
-    4. Respond in a structured bullet-point format based only on the document content.
+    1. Split the document into semantically meaningful chunks using the `chunk_agent`.
+    2. Embed the chunks and store them in a vector database.
+    3. Query the vector database using the question below.
+    4. Provide a precise, information-rich response based strictly on the document's content.
 
     Document (truncated to fit context limits):
     {text}
