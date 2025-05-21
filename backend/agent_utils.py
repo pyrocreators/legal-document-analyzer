@@ -27,8 +27,8 @@ def process_pdf_and_with_summary(pdf_path):
     - Respond in the **same language** as the document.
     - Your response should be **brief**, **factual**, and **clearly formatted** using bullet points if helpful.
 
-    ### Document (first 4000 characters):
-    {text[:4000]}
+    ### Document
+    {text}
     """
 
     last_response = None
@@ -71,7 +71,7 @@ def process_pdf_and_with_key_points(pdf_path):
     4. Respond in a structured bullet-point format based only on the document content.
 
     Document (truncated to fit context limits):
-    {text[:4000]}
+    {text}
 
     Question:
     {hardcoded_question}
