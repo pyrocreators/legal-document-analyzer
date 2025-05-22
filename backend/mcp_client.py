@@ -16,7 +16,7 @@ class MCPClient:
                 text = await resp.text()
                 try:
                     data = await resp.json()
-                except:
+                except (aiohttp.ContentTypeError, ValueError):
                     data = text
         return data
 

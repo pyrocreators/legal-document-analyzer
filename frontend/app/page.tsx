@@ -165,7 +165,7 @@ export default function Home() {
             onClick={handleLegalQuery}
             disabled={legalLoading || !legalQuestion}
           >
-            {legalLoading ? "Searching..." : "Ask Wikipedia"}
+            {legalLoading ? "Searching..." : "Search Legal Terminology"}
           </Button>
           {legalResponse && (
             <div
