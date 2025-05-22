@@ -1,82 +1,55 @@
 import logging
 from jsonrpcserver import serve, method, Success, Error
-from utils import chunk_text, get_vector_store, load_vector_store, get_top_chunks
-from typing import Dict, Any
-import os
+import wikipedia
 
 logging.basicConfig(level=logging.INFO)
-
 
 @method
 def listTools():
     logging.info("→ listTools called")
     return Success([{
-        "name": "chunk_pdf_text",
-        "description": "Splits the input text into smaller chunks.",
+        "name": "search_wikipedia",
+        "description": "Search Wikipedia and return the top-k page titles, snippets, and URLs.",
         "parameters": {
             "type": "object",
             "properties": {
-                "text": {"type": "string"}
+                "query": {"type": "string"},
+                "top_k":  {"type": "integer", "default": 3}
             },
-            "required": ["text"]
-        }
-    }, {
-        "name": "embed_and_store_single_input",
-        "description": "Embeds text and stores it in the vector store.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "text": {"type": "string"},
-                "store_path": {"type": "string"}
-            },
-            "required": ["text", "store_path"]
-        }
-    }, {
-        "name": "qa_from_store",
-        "description": "Retrieves chunks relevant to a question from a stored vector database.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "question": {"type": "string"},
-                "store_path": {"type": "string"}
-            },
-            "required": ["question", "store_path"]
+            "required": ["query"]
         }
     }])
 
-
 @method
-def callTool(tool: str, args: Dict[str, Any]):
+def callTool(tool: str, args: dict):
     logging.info(f"→ callTool called with tool={tool!r}, args={args!r}")
-
+    if tool != "search_wikipedia":
+        # MUST use (code:int, message:str)
+        return Error(1, f"Unsupported tool {tool!r}")
+    # safe to proceed
+    q = args.get("query", "")
+    k = int(args.get("top_k", 3))
     try:
-        if tool == "chunk_pdf_text":
-            text = args["text"]
-            chunks = chunk_text(text)
-            return Success("\n---\n".join(chunks[:5]))
-
-        elif tool == "embed_and_store_single_input":
-            text = args["text"]
-            store_path = args["store_path"]
-            os.makedirs(os.path.dirname(store_path), exist_ok=True)
-            chunks = chunk_text(text)
-            get_vector_store(chunks, store_path)
-            return Success(f"Successfully embedded and stored vectors at {store_path}.")
-
-        elif tool == "qa_from_store":
-            question = args["question"]
-            store_path = args["store_path"]
-            vectordb = load_vector_store(store_path)
-            results = get_top_chunks(question, vectordb)
-            return Success("\n".join([doc.page_content for doc in results]))
-
-        else:
-            return Error(1, f"Unsupported tool {tool!r}")
-
+        titles = wikipedia.search(q, results=k)
     except Exception as e:
-        logging.exception(f"Tool {tool} execution failed")
-        return Error(2, f"Tool execution failed: {str(e)}")
+        logging.exception("Wikipedia search failed")
+        return Error(2, f"Search failed: {e}")
+    payload = []
+    for title in titles:
+        try:
+            summary = wikipedia.summary(title, sentences=2, auto_suggest=False)
+            page    = wikipedia.page(title, auto_suggest=False)
+            payload.append({
+                "title":   page.title,
+                "summary": summary,
+                "url":     page.url
+            })
+        except Exception as e:
+            logging.exception(f"Failed to load page {title}")
+            payload.append({"title": title, "error": str(e)})
+    logging.info(f"← callTool returning Success(payload of length {len(payload)})")
+    logging.debug(f"Payload: {payload}")
+    return Success(payload)
 
-
-print("Document Analyzer MCP server listening on http://localhost:4001")
+print("Wikipedia MCP server listening on http://localhost:4001")
 serve(port=4001)

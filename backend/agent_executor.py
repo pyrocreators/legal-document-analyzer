@@ -1,73 +1,59 @@
-from langchain.schema import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
-import json
-import aiohttp
-import uuid
+from langgraph.prebuilt import create_react_agent
+from langgraph_supervisor import create_supervisor
+from agent_tools import chunk_pdf_text, embed_and_store_single_input, qa_from_store
+
+llm_model = "gpt-4o-mini"
 
 
-class MCPAgent:
-    def __init__(self):
-        self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.9)
-        self.mcp_url = "http://localhost:4001"
-        self._tools = None
+chunk_agent = create_react_agent(
+    model=f"openai:{llm_model}",
+    tools=[chunk_pdf_text],
+    prompt="You are an agent that splits large text documents into smaller chunks.",
+    name="chunk_agent"
+)
 
-    async def _rpc_call(self, method, params=None):
-        payload = {
-            "jsonrpc": "2.0",
-            "id": str(uuid.uuid4()),
-            "method": method,
-            "params": params or {}
-        }
-        async with aiohttp.ClientSession() as session:
-            async with session.post(self.mcp_url, json=payload) as response:
-                return await response.json()
+embed_agent = create_react_agent(
+    model=f"openai:{llm_model}",
+    tools=[embed_and_store_single_input],
+    prompt="You are an agent that embeds text chunks and stores them in a vector database.",
+    name="embed_agent"
+)
 
-    async def load_tools(self):
-        if self._tools is None:
-            response = await self._rpc_call("listTools")
-            self._tools = response.get("result", [])
+qa_agent = create_react_agent(
+    model=f"openai:{llm_model}",
+    tools=[qa_from_store],
+    prompt="You are an agent that answers questions by querying the stored vector database.",
+    name="qa_agent"
+)
 
-    async def execute_tool(self, tool_name, args):
-        response = await self._rpc_call("callTool", {"tool": tool_name, "args": args})
-        return response.get("result")
-
-    async def process_prompt(self, prompt):
-        await self.load_tools()
-
-        # First LLM call
-        messages = [
-            SystemMessage(content="You are a document analysis assistant that can call tools via MCP."),
-            HumanMessage(content=prompt)
-        ]
-
-        if self._tools:
-            response = await self.llm.agenerate([messages])
-            message = response.generations[0][0].message
-
-            if hasattr(message, "function_call"):
-                tool_name = message.function_call["name"]
-                tool_args = json.loads(message.function_call["arguments"])
-
-                # Execute tool
-                tool_result = await self.execute_tool(tool_name, tool_args)
-
-                # Second LLM call with tool result
-                follow_up_messages = messages + [
-                    message,
-                    {
-                        "role": "function",
-                        "name": tool_name,
-                        "content": json.dumps(tool_result)
-                    }
-                ]
-                follow_up = await self.llm.agenerate([follow_up_messages])
-                return follow_up.generations[0][0].message.content
-
-            return message.content
-        else:
-            response = await self.llm.agenerate([messages])
-            return response.generations[0][0].message.content
+supervisor = create_supervisor(
+    agents=[chunk_agent, embed_agent, qa_agent],
+    model=ChatOpenAI(model=llm_model),
+    prompt=(
+        "You are a supervisor managing three agents: chunk_agent, embed_agent, and qa_agent. "
+        "Based on the user's query, delegate the task to the most appropriate agent."
+    )
+).compile()
 
 
-# Initialize the agent
-agent = MCPAgent()
+def run_supervisor_with_text(text, question, store_path="vector_store"):
+    chunk_input = text
+    print("Chunking text:")
+    for chunk in chunk_agent.stream({"messages": [{"role": "user", "content": chunk_input}]}):
+        print(chunk)
+    print("\n")
+
+    embed_input = text
+    print("Embedding and storing:")
+    for chunk in embed_agent.stream({"messages": [{"role": "user", "content": embed_input}]}):
+        print(chunk)
+    print("\n")
+
+    qa_input = question
+    print("Querying stored data:")
+    for chunk in qa_agent.stream({"messages": [{"role": "user", "content": qa_input}]}):
+        return chunk['agent']['messages'][0]['content']
+    print("\n")
+
+

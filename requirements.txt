@@ -20,3 +20,6 @@ langchain-community
 streamlit
 fastapi
 openai
+langsmith
+langchain-openai
+wikipedia
