@@ -4,6 +4,8 @@ import shutil
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from agent_utils import process_pdf_and_with_summary, process_pdf_and_with_key_points
+from wikipedia_communicator import chat_with_tools_all, init_tools
+from fastapi.responses import JSONResponse
 
 
 load_dotenv()
@@ -48,3 +50,15 @@ async def upload_pdf(file: UploadFile = File(...)):
     response_text = process_pdf_and_with_key_points(file_location)
     return response_text
 
+@app.get("/legal-terminology/")
+async def legal_terminology_helper(question: str):
+    response_text = await chat_with_tools_all(question)
+
+    return JSONResponse(content={
+        "response": response_text
+    })
+
+
+@app.on_event("startup")
+async def startup_event():
+    await init_tools()

@@ -21,3 +21,4 @@ fastapi
 openai
 langsmith
 langchain-openai
+wikipedia
