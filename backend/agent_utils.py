@@ -51,15 +51,17 @@ def process_pdf_and_with_key_points(pdf_path):
     text = read_pdf(pdf_path)
 
     hardcoded_question = (
-            "You are analyzing a legal document. Summarize the key points using the following format:\n"
-            "- [Key Point Title]: [Short Description]\n\n"
-            "If the document is an NDA or similar, be sure to include:\n"
-            "- Confidentiality Obligations\n"
-            "- Term and Termination\n"
-            "- Permitted Disclosures\n"
-            "- Restrictions on Use\n"
-            "- Consequences of Breach\n\n"
-            "Respond in the same language as the document. Avoid generic statements like 'The task has been completed.'"
+        "You are analyzing a legal document. Summarize the key points using the following format:\n"
+        "- [Key Point Title]: [Short Description]\n\n"
+        "you have to remove the brackets ([]) from the actual key point title"
+        "If the document is an NDA or similar, be sure to include:\n"
+        "- Confidentiality Obligations\n"
+        "- Term and Termination\n"
+        "- Permitted Disclosures\n"
+        "- Restrictions on Use\n"
+        "- Consequences of Breach\n\n"
+        "Respond in the same language as the document. Do not add introductory or concluding phrases such as "
+        "'Here are the key points summarized from the legal document.' or 'In summary.' Only return the bullet points."
     )
 
     plan_prompt = f"""
