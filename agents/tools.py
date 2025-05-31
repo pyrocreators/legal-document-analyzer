@@ -1,5 +1,5 @@
 from langchain.tools import tool
-from utils import chunk_text, get_vector_store, load_vector_store, get_top_chunks
+from rag_utils.utils import chunk_text, get_vector_store, load_vector_store, get_top_chunks
 HARDCODED_STORE_PATH = "vectorstore/default_store"
 
 @tool

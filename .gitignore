@@ -128,7 +128,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-backend/.env
+.env
 .venv
 env/
 venv/
@@ -174,8 +174,8 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-/backend/vectorstore
-/backend/uploaded_pdfs
+/vectorstore
+/uploaded_pdfs
 /backend/vector_store_path
 /backend/nda_store
 /backend/nda_store_new
