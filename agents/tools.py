@@ -6,7 +6,7 @@ HARDCODED_STORE_PATH = "vectorstore/default_store"
 def chunk_pdf_text(text: str) -> str:
     """Splits the input text into smaller chunks."""
     chunks = chunk_text(text)
-    return "\n---\n".join(chunks[:10])  # Return a sample of chunks for brevity (5 first chunks returned)
+    return "\n---\n".join(chunks[:10])  # Return a sample of chunks for brevity (10 first chunks returned)
 
 
 @tool
