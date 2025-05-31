@@ -13,7 +13,7 @@ def process_pdf_and_with_summary(pdf_path):
     You are a legal document analyzer agent. Your task is to process and summarize the legal document provided below. Follow these steps carefully:
 
     1. Split the document into semantically meaningful chunks using the `chunk_agent`.
-    2. Embed the chunks and store them in a vector database.
+    2. Embed the chunks and store them in a vector database using the 'embed_agent'.
     3. Query the vector database using the question below.
     4. Provide a precise, information-rich response based strictly on the document's content.
 
@@ -66,7 +66,7 @@ def process_pdf_and_with_key_points(pdf_path):
     You are a legal document analyzer agent. Your task is to:
 
     1. Split the document into semantically meaningful chunks using the `chunk_agent`.
-    2. Embed the chunks and store them in a vector database.
+    2. Embed the chunks and store them in a vector database using the 'embed_agent'.
     3. Query the vector database using the question below.
     4. Provide a precise, information-rich response based strictly on the document's content.
 

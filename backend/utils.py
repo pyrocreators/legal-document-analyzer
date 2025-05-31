@@ -1,7 +1,7 @@
 import os
 import fitz
 from dotenv import load_dotenv
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langsmith import traceable
@@ -25,7 +25,7 @@ def read_pdf(file_path):
 
 @traceable
 def chunk_text(text):
-    splitter = RecursiveCharacterTextSplitter(
+    splitter = CharacterTextSplitter(
         chunk_size=500,
         chunk_overlap=100
     )
