@@ -1,12 +1,12 @@
 from langchain.tools import tool
-from utils import chunk_text, get_vector_store, load_vector_store, get_top_chunks
+from rag_utils.utils import chunk_text, get_vector_store, load_vector_store, get_top_chunks
 HARDCODED_STORE_PATH = "vectorstore/default_store"
 
 @tool
 def chunk_pdf_text(text: str) -> str:
     """Splits the input text into smaller chunks."""
     chunks = chunk_text(text)
-    return "\n---\n".join(chunks[:5])  # Return a sample of chunks for brevity
+    return "\n---\n".join(chunks[:10])  # Return a sample of chunks for brevity (10 first chunks returned)
 
 
 @tool

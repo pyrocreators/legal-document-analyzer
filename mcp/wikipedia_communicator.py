@@ -1,5 +1,5 @@
 import json, openai
-from mcp_client import MCPClient
+from mcp.client import MCPClient
 
 WIKI_SPECS = []
 OPENAI_FUNCTIONS = []

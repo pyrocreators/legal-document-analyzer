@@ -1,8 +1,8 @@
 from starlette.responses import JSONResponse
 from langchain_core.messages import convert_to_messages
-from utils import read_pdf
+from rag_utils.utils import read_pdf
 from langsmith import traceable
-from agent_executor import supervisor
+from agents.executor import supervisor
 
 
 @traceable
@@ -13,7 +13,7 @@ def process_pdf_and_with_summary(pdf_path):
     You are a legal document analyzer agent. Your task is to process and summarize the legal document provided below. Follow these steps carefully:
 
     1. Split the document into semantically meaningful chunks using the `chunk_agent`.
-    2. Embed the chunks and store them in a vector database.
+    2. Embed the chunks and store them in a vector database using the 'embed_agent'.
     3. Query the vector database using the question below.
     4. Provide a precise, information-rich response based strictly on the document's content.
 
@@ -51,22 +51,24 @@ def process_pdf_and_with_key_points(pdf_path):
     text = read_pdf(pdf_path)
 
     hardcoded_question = (
-            "You are analyzing a legal document. Summarize the key points using the following format:\n"
-            "- [Key Point Title]: [Short Description]\n\n"
-            "If the document is an NDA or similar, be sure to include:\n"
-            "- Confidentiality Obligations\n"
-            "- Term and Termination\n"
-            "- Permitted Disclosures\n"
-            "- Restrictions on Use\n"
-            "- Consequences of Breach\n\n"
-            "Respond in the same language as the document. Avoid generic statements like 'The task has been completed.'"
+        "You are analyzing a legal document. Summarize the key points using the following format:\n"
+        "- [Key Point Title]: [Short Description]\n\n"
+        "you have to remove the brackets ([]) from the actual key point title"
+        "If the document is an NDA or similar, be sure to include:\n"
+        "- Confidentiality Obligations\n"
+        "- Term and Termination\n"
+        "- Permitted Disclosures\n"
+        "- Restrictions on Use\n"
+        "- Consequences of Breach\n\n"
+        "Respond in the same language as the document. Do not add introductory or concluding phrases such as "
+        "'Here are the key points summarized from the legal document.' or 'In summary.' Only return the bullet points."
     )
 
     plan_prompt = f"""
     You are a legal document analyzer agent. Your task is to:
 
     1. Split the document into semantically meaningful chunks using the `chunk_agent`.
-    2. Embed the chunks and store them in a vector database.
+    2. Embed the chunks and store them in a vector database using the 'embed_agent'.
     3. Query the vector database using the question below.
     4. Provide a precise, information-rich response based strictly on the document's content.
 
