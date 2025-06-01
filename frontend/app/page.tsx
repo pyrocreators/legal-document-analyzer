@@ -76,11 +76,15 @@ export default function Home() {
     }
   };
 
-  function formatMarkdownToHTML(text: string): string {
-    return text
-      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      .replace(/^- (.*)/gm, "<p>$1</p>");
-  }
+function formatMarkdownToHTML(text: string): string {
+  return text
+    .replace(/^(.+?):/gm, "<strong>$1:</strong>")
+
+    .split(/\n+/)
+    .map((line) => `<p>${line.trim()}</p>`)
+    .join("");
+}
+
 
   function formatWikipediaResponse(text: string): string {
     return (
