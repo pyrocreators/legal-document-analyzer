@@ -26,6 +26,7 @@ legal-document-analyzer/
 ├── frontend/                # Next.js frontend (not shown here)
 ├── mcp/                     # Multi-Agent Communication Protocol components
 ├── rag_utils/              # PDF reading utilities
+├── static/                 # the static images
 ├── uploaded_pdfs/          # Directory to hold uploaded PDFs
 ├── vectorstore/            # Vector database files
 ├── app.py                  # Main FastAPI app entry point
